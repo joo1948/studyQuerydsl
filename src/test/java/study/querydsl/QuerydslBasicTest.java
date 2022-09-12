@@ -6,7 +6,9 @@ import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
@@ -676,6 +678,87 @@ public class QuerydslBasicTest {
         }
     }
 
+    /**
+     *
+     * 동적 쿼리 - BooleanBuilder사용
+     */
+    @Test
+    public void dynamicQuery_BooleanBuilder(){
+        String usernameParam = "member1";
+        Integer ageParam = null;
 
+        List<Member> result = searchMember1(usernameParam, ageParam);
+        assertThat(result.size()).isEqualTo(1);
+    }
+
+    private List<Member> searchMember1(String usernameCond, Integer ageCond) {
+
+        BooleanBuilder builder = new BooleanBuilder();
+
+        if(usernameCond != null){
+            //usernameCond가 null이 아니면 member의 username이 usernameCond와 같으면 이라는 and조건을 추가한다.
+            builder.and(member.username.eq(usernameCond));
+        }
+        if(ageCond !=null){
+            //ageCond null이 아니면 member의 age ageCond 같으면 이라는 and조건을 추가한다.
+            builder.and(member.age.eq(ageCond));
+        }
+
+        //위에서 생성한 조건 절을 where에 넣기
+        return queryFactory
+                .selectFrom(member)
+                .where(builder)
+                .fetch();
+    }
+
+    /**
+     * 동적 쿼리 - 다중 where 파라미터 처리 ***
+     * 1. booleanBuilder와 다르게 쿼리 가독성이 높아짐
+     * 2. 메서드를 다른 쿼리에서 사용 가능함.
+     * 3. 조합이 가능함.(allEq()메서드 확인할것)
+     */
+    @Test
+    public void dynamicQuery_WhereParam(){
+        String usernameParam = "member1";
+        Integer ageParam = null;
+
+        List<Member> result = searchMember2(usernameParam, ageParam);
+        assertThat(result.size()).isEqualTo(1);
+    }
+
+    private List<Member> searchMember2(String usernameCond, Integer ageCond) {
+        return queryFactory
+                .selectFrom(member)
+                //.where(usernameEq(usernameCond), ageEq(ageCond))
+                .where(allEq(usernameCond, ageCond))
+                .fetch();
+
+        /**
+         * 조합이 가능함. >> null체크는 잘 해줘야함.
+         */
+
+        /**
+         * select member0_.id as id1_1_, member0_.age as age2_1_, member0_.team_id as team_id4_1_, member0_.username as username3_1_
+         * from member member0_
+         * where member0_.username='member1';
+         * >> age는 null이기 때문에 무시하게 됨.
+         */
+    }
+
+    private BooleanExpression usernameEq(String usernameCond) {
+        return usernameCond != null ? member.username.eq(usernameCond) : null;
+        //만약 where(null, 10)이렇게 들어가면 null을 무시해버린다.
+    }
+
+    private BooleanExpression ageEq(Integer ageCond) {
+        return ageCond != null ? member.age.eq(ageCond) : null;
+    }
+
+    /**
+     * 조합이가능하다. **
+     */
+    private BooleanExpression allEq(String usernameCond, Integer ageCond){
+        return usernameEq(usernameCond).and(ageEq(ageCond));
+    }
 
 }
