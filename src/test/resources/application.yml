@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: local #로컬은 local, 개발서버느 dev등 변경 가능
+    active: test #로컬은 local, 개발서버느 dev등 변경 가능
   datasource:
     url: jdbc:h2:tcp://localhost/~/querydsl
     username: sa
