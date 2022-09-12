@@ -14,31 +14,26 @@ import javax.persistence.PersistenceContext;
 @Profile("local")
 @Component
 @RequiredArgsConstructor
-public class IntiMember {
-
-    private final InitMemberService intiMemberService;
-
+public class InitMember {
+    private final InitMemberService initMemberService;
     @PostConstruct
-    public void init(){
-        intiMemberService.init();
+    public void init() {
+        initMemberService.init();
     }
-
-
-
-    static class InitMemberService{
-        @PersistenceContext private EntityManager em;
+    @Component
+    static class InitMemberService {
+        @PersistenceContext
+        EntityManager em;
         @Transactional
-        public void init(){
+        public void init() {
             Team teamA = new Team("teamA");
             Team teamB = new Team("teamB");
             em.persist(teamA);
             em.persist(teamB);
-
-            for(int i=0;i<100;i++){
-                Team selectedTeam = i%2 == 0 ? teamA : teamB;
-                em.persist(new Member("member"+i, i, selectedTeam));
+            for (int i = 0; i < 100; i++) {
+                Team selectedTeam = i % 2 == 0 ? teamA : teamB;
+                em.persist(new Member("member" + i, i, selectedTeam));
             }
-
         }
     }
 }
