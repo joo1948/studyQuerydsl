@@ -74,15 +74,20 @@ class MemberJpaRepositoryTest {
         em.persist(member4);
 
         MemberSearchCondition condition = new MemberSearchCondition();
-//        condition.setAgeGoe(35);
-//        condition.setAgeGoe(40);
-//        condition.setTeamName("teamB");
+        condition.setAgeGoe(35);
+        condition.setAgeGoe(40);
+        condition.setTeamName("teamB");
+
         /**
+         *   //condition.setAgeGoe(35);
+         *   //condition.setAgeGoe(40);
+         *   //condition.setTeamName("teamB");
+         *
          * 만약 조건이 없는 경우는 모든 데이터를 다 가져온다. >> 데이터가 많으면 많을수록 성능 안좋아짐.
          * 페이징 처리 해주는 부분이 같이 있어야한다.
          */
 
-        List<MemberTeamDto> result = memberJpaRepository.searchByBUilder(condition);
+        List<MemberTeamDto> result = memberJpaRepository.search(condition);
 
         assertThat(result).extracting("username").containsExactly("member4");
     }
