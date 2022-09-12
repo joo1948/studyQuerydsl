@@ -813,4 +813,37 @@ public class QuerydslBasicTest {
         em.flush(); //필수
         em.clear(); //필수
     }
+    
+    @Test
+    public void sqlFunction(){
+        List<String> result = queryFactory
+                .select(Expressions.stringTemplate(
+                        "function('replace', {0}, {1}, {2})",
+                        member.username, "member", "M")
+                )
+                .from(member)
+                .fetch();
+
+        for (String s : result) {
+            System.out.println("s = " + s);
+        }
+
+    }
+
+    @Test
+    public void sqlFunction2(){
+        List<String> result = queryFactory
+                .select(member.username)
+                .from(member)
+                //.where(member.username.eq(
+                //         Expressions.stringTemplate("function('lower', {0})", member.username)
+                //))
+                .where(member.username.eq(member.username.lower())) //거의 대부분 사용되는 sqlFunction은 함수로 제공해준다.
+                .fetch();
+
+
+        for (String s : result) {
+            System.out.println("s = " + s);
+        }
+    }
 }
